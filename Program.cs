@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -48,23 +49,62 @@ namespace ApiClient
     {
         static async Task Main(string[] args)
         {
+
             var client = new HttpClient();
 
-            var responseAsStream = await client.GetStreamAsync("https://ghibliapi.herokuapp.com/films");
+            var url = $"https://ghibliapi.herokuapp.com/films";
+            var responseAsStream = await client.GetStreamAsync(url);
+
 
             // Supply that *stream of data* to a Deserialize that will interpret it as a List of GhibliFilm objects.
             var ghibliFilms = await JsonSerializer.DeserializeAsync<List<GhibliFilm>>(responseAsStream);
 
-            var table = new ConsoleTable("Title", "Release Year", "Original Title");
+            //var table = new ConsoleTable("Title", "Release Year", "Original Title");
 
-            // For each film in ghibliFilms
+            Console.WriteLine();
+            Console.WriteLine("List of Ghibli Movies:");
+
+            // I don't like how this looks
+            // var ghibliTitles = new List<string> { };
+            // foreach (var movie in ghibliFilms)
+            // {
+            //     ghibliTitles.Add(movie.Title);
+            // }
+
+            // Console.WriteLine(String.Join(", ", ghibliTitles));
+
             foreach (var film in ghibliFilms)
             {
-                // Output some details on that film
-                table.AddRow(film.Title, film.ReleaseDate, film.OriginalTitle);
-
+                Console.WriteLine(film.Title);
             }
-            table.Write();
+            Console.WriteLine();
+            Console.WriteLine("What movie would you like to see more information about?");
+
+            var response = Console.ReadLine().ToLower();
+
+            var chosenMovie = ghibliFilms.FirstOrDefault(movie => movie.Title.ToLower() == response);
+
+            if (chosenMovie == null)
+            {
+                Console.WriteLine("Sorry, I don't understand.");
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine($"{chosenMovie.Title} was released in {chosenMovie.ReleaseDate}.");
+                Console.WriteLine($"Its Japanese name is {chosenMovie.OriginalTitle} ({chosenMovie.OriginalTitleRomanized}).");
+                Console.WriteLine($"It was directed by {chosenMovie.Director} and produced by {chosenMovie.Producer}");
+                Console.WriteLine($"Runtime: {chosenMovie.RunningTime} minutes; Rotten Tomatoes Score: {chosenMovie.RtScore}");
+
+                Console.WriteLine("Summary:");
+                Console.WriteLine(chosenMovie.Description);
+
+                Console.WriteLine();
+                Console.WriteLine($"URL: {chosenMovie.Url}");
+                Console.WriteLine();
+            }
+
+            // table.Write();
 
 
         }
