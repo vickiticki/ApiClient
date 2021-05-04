@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ConsoleTables;
+
 namespace ApiClient
 {
     class GhibliFilm
@@ -52,13 +54,17 @@ namespace ApiClient
 
             // Supply that *stream of data* to a Deserialize that will interpret it as a List of GhibliFilm objects.
             var ghibliFilms = await JsonSerializer.DeserializeAsync<List<GhibliFilm>>(responseAsStream);
+
+            var table = new ConsoleTable("Title", "Release Year", "Original Title");
+
             // For each film in ghibliFilms
             foreach (var film in ghibliFilms)
             {
                 // Output some details on that film
-                Console.WriteLine($"The film is named {film.Title} and the score is {film.RtScore}.");
+                table.AddRow(film.Title, film.ReleaseDate, film.OriginalTitle);
 
             }
+            table.Write();
 
 
         }
